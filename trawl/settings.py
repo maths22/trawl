@@ -25,7 +25,7 @@ SECRET_KEY = 'iq7977o*x%4=^tt*+72p-wppxv79h-dd%ohpb512^)3+2%_hfb'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['security.maths22.com']
 
 
 # Application definition
@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'trawl.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'trawl',
+	'USER': 'trawluser',
+	'PASSWORD': '*y83uLJjEo0g&ff',
+	'HOST': 'localhost',
+	'PORT': '',
     }
 }
 
