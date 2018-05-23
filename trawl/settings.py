@@ -25,12 +25,13 @@ SECRET_KEY = 'iq7977o*x%4=^tt*+72p-wppxv79h-dd%ohpb512^)3+2%_hfb'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['security.maths22.com']
+ALLOWED_HOSTS = ['security.laudiacay.net']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'phishing.apps.PhishingConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -76,8 +77,8 @@ WSGI_APPLICATION = 'trawl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'trawl',
-	'USER': 'trawluser',
+        'NAME': 'mytrawl',
+	'USER': 'mytrawluser',
 	'PASSWORD': '*y83uLJjEo0g&ff',
 	'HOST': 'localhost',
 	'PORT': '',
