@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h3>Compose message</h3>
+  <b>Instructions:</b>
+  <p>
+    {{ directions }}
+  </p>
+  <form>
+    <div class="form-group">
+      <label for="messageTemplate">Message Template</label>
+      <textarea class="form-control" rows="10" id="messageTemplate"></textarea>
+    </div>
+    <ul class="list-group" style="max-width: 30em">
+      <li class="button-container list-group-item">
+        This message reads like an email:
+        <label class="btn btn-default">
+          <input type="checkbox" name="emailQuestion" id="emailQuestion" value="yes" autocomplete="off"> Yes
+        </label>
+      </li>
+
+      <li class="button-container list-group-item">
+        This message is comprehensible:
+        <label class="btn btn-default">
+          <input type="checkbox" name="comprehensibleQuestion" id="comprehensibleQuestion" value="yes" autocomplete="off"> Yes
+        </label>
+      </li>
+
+      <li class="button-container list-group-item">
+        This message contains only the listed personal information:
+        <label class="btn btn-default">
+          <input type="checkbox" name="personalInfo" id="personalInfo" value="yes" autocomplete="off"> Yes
+        </label>
+      </li>
+    </ul>
+
+    <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(".button-container input, #messageTemplate").on("change", function() {
+
+    var enabled = $("#messageTemplate").val()
+        && $("#emailQuestion").is(":checked")
+        && $("#comprehensibleQuestion").is(":checked")
+        && $("#personalInfo").is(":checked");
+    $("#submitButton").prop('disabled', !enabled);
+});
+</script>
+{% endblock %}
