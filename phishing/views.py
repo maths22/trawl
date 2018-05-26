@@ -27,7 +27,7 @@ def submit(request):
 
 def submit_template(request):
     worker_id = request.POST.get('worker_id', '')
-    assignment_id = request.POST.get('assignment_id', '')
+    assignment_id = request.POST.get('assignmentId', '')
     try:
         mt_usr = MTurkUser.objects.get(pk=worker_id)
     except MTurkUser.DoesNotExist:
