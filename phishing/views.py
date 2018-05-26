@@ -1,7 +1,9 @@
 from django.shortcuts import render
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
+
+from phishing.models import Submission, MTurkUser
 
 
 def index(request):
@@ -12,9 +14,31 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
-def submit_template(request):
+def submit(request):
     template = loader.get_template('phishing/submit.html')
     context = {
         'directions': 'TODO',
+        'worker_id': request.GET.get('workerId', ''),
+        'assignment_id': request.GET.get('assignmentId', ''),
+        'turk_submit_to': request.GET.get('turkSubmitTo', '')
     }
     return HttpResponse(template.render(context, request))
+
+
+def submit_template(request):
+    worker_id = request.POST.get('worker_id', '')
+    assignment_id = request.POST.get('assignment_id', '')
+    try:
+        mt_usr = MTurkUser.objects.get(pk=worker_id)
+    except MTurkUser.DoesNotExist:
+        mt_usr = MTurkUser(workerId=worker_id)
+        mt_usr.save()
+
+
+    #todo validate
+    s = Submission(assignmentId=assignment_id,
+                   creator=mt_usr,
+                   payout=False,
+                   text=request.POST.get('message_template', ''))
+    s.save()
+    return JsonResponse({'result': s.pk})

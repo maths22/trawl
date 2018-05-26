@@ -6,10 +6,13 @@
   <p>
     {{ directions }}
   </p>
-  <form>
+  <form action="/submit_template" method="post" id="submitForm">
+    {% csrf_token %}
+    <input type="hidden" name="worker_id" value="{{ worker_id }}"/>
+    <input type="hidden" name="assignment_id" value="{{ assignment_id }}"/>
     <div class="form-group">
       <label for="messageTemplate">Message Template</label>
-      <textarea class="form-control" rows="10" id="messageTemplate"></textarea>
+      <textarea class="form-control" rows="10" name="message_template" id="messageTemplate"></textarea>
     </div>
     <ul class="list-group" style="max-width: 30em">
       <li class="button-container list-group-item">
@@ -47,6 +50,34 @@ $(".button-container input, #messageTemplate").on("change", function() {
         && $("#comprehensibleQuestion").is(":checked")
         && $("#personalInfo").is(":checked");
     $("#submitButton").prop('disabled', !enabled);
+});
+
+function submitToMturk() {
+    var url = "{{ turk_submit_to }}/mturk/externalSubmit";
+    $.ajax({
+        url:url,
+        type:'post',
+        data:$('#submitForm').serialize(),
+        success:function(d){
+            if(JSON.parse(d)['result']) {
+                submitToMturk();
+            }
+        }
+    });
+}
+
+$('#submitForm').submit(function(e){
+    e.preventDefault();
+    $.ajax({
+        url:'/submit_template',
+        type:'post',
+        data:$('#submitForm').serialize(),
+        success:function(d){
+            if(JSON.parse(d)['result']) {
+                submitToMturk();
+            }
+        }
+    });
 });
 </script>
 {% endblock %}
