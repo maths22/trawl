@@ -52,15 +52,18 @@ $(".button-container input, #messageTemplate").on("change", function() {
     $("#submitButton").prop('disabled', !enabled);
 });
 
-$('#submitForm').submit(function(e){
+var submitForm = $('#submitForm');
+
+submitForm.submit(function(e){
     e.preventDefault();
     $.ajax({
         url:'/submit_template',
         type:'post',
-        data:$('#submitForm').serialize(),
+        data:submitForm.serialize(),
         success:function(d){
-            if(JSON.parse(d)['result']) {
-                $('#submitForm').submit();
+            if(d['result']) {
+                submitForm.unbind("submit");
+                submitForm.submit();
             }
         }
     });

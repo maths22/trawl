@@ -1,7 +1,10 @@
+import datetime
+
 from django.shortcuts import render
 
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from phishing.models import Submission, MTurkUser
 
@@ -14,6 +17,7 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
+@xframe_options_exempt
 def submit(request):
     template = loader.get_template('phishing/submit.html')
     context = {
@@ -39,6 +43,7 @@ def submit_template(request):
     s = Submission(assignmentId=assignment_id,
                    creator=mt_usr,
                    payout=False,
+                   when_submitted=datetime.datetime.now(),
                    text=request.POST.get('message_template', ''))
     s.save()
-    return JsonResponse({'result': s.pk})
+    return JsonResponse({'result': 'success'})
