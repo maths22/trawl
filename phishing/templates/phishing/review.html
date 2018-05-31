@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <b>Instructions:</b>
+  <p>
+    Imagine this is your corporate inbox, and you are {{ name }}.  Please classify each email as spam or not spam.
+    Note that all messages may be spam or all messages may be not spam.
+  </p>
+  <h3>Inbox</h3>
+  <div class="row">
+  <div class="col-md-4">
+
+   <div class="list-group">
+    {% for message in messages %}
+      <a href="#"  type="button" class="list-group-item msg" id="msg-{{ forloop.counter0 }}">
+        <b>{{ message.subject }}</b> ({{ message.from }}) <span class="hidden" id="msg-done-{{ forloop.counter0 }}">✔</span>
+      </a>
+    {% endfor %}
+   </div>
+  </div>
+  <div class="col-md-8">
+    <div class="panel panel-default">
+      <div class="panel-body hidden" id="message-panel">
+        <div class="btn-group colors" data-toggle="buttons">
+        <label class="btn btn-danger">
+          <input type="radio" class="spamselector" name="spam" value="spam" autocomplete="off"> Spam
+        </label>
+        <label class="btn btn-success">
+          <input type="radio" class="spamselector" name="spam" value="notSpam" autocomplete="off"> Not Spam
+        </label>
+        </div>
+
+        <div id="message-content">
+          {% for message in messages %}
+            <div class="hidden msg-body" id="msg-body-{{ forloop.counter0 }}">
+              <h4>{{ message.subject }}</h4>
+              <p>
+                From: {{ message.from }}
+              </p>
+              <p>
+                {{ message.body }}
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <form action="{{ turk_submit_to }}/mturk/externalSubmit" method="post" id="submitForm">
+    {% csrf_token %}
+    <input type="hidden" name="worker_id" value="{{ worker_id }}"/>
+    <input type="hidden" name="assignmentId" value="{{ assignment_id }}"/>
+
+    <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var selected = null;
+var results = [];
+var res_len = {{ messages|length }};
+
+for (var i = 0; i < res_len; i++) {
+    results[i] = null;
+}
+
+function allDone() {
+    for (i = 0; i < res_len; i++) {
+        if(results[i] == null) {
+            return false;
+        }
+    }
+    return true;
+}
+
+$(".msg").on("click", function() {
+    msgid = this.id.split("-")[1];
+    selected = msgid;
+    $("#message-panel").removeClass("hidden");
+    $(".msg-body").addClass("hidden");
+    $("#msg-body-"+msgid).removeClass("hidden");
+    $(".spamselector").prop("checked", false);
+});
+
+$(".spamselector").on("change", function() {
+    results[selected] = this.value;
+  $("#msg-done-"+selected).removeClass("hidden");
+  console.log(allDone());
+  if(allDone()) {
+      $("#submitButton").prop('disabled', false);
+  }
+});
+
+var submitForm = $('#submitForm');
+
+submitForm.submit(function(e){
+    e.preventDefault();
+    var data = submitForm.serialize();
+    data.results = results;
+    $.ajax({
+        url:'/submit_review',
+        type:'post',
+        data:submitForm.serialize(),
+        success:function(d){
+            if(d['result']) {
+                submitForm.unbind("submit");
+                submitForm.submit();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

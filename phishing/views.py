@@ -47,3 +47,27 @@ def submit_template(request):
                    text=request.POST.get('message_template', ''))
     s.save()
     return JsonResponse({'result': 'success'})
+
+
+@xframe_options_exempt
+def review(request):
+    template = loader.get_template('phishing/review.html')
+    context = {
+        'name': 'John Doe',
+        'worker_id': request.GET.get('workerId', ''),
+        'assignment_id': request.GET.get('assignmentId', ''),
+        'turk_submit_to': request.GET.get('turkSubmitTo', ''),
+        'messages': [
+            {
+                'subject': 'Subject 1',
+                'from': 'Sample name <sample@example.com>',
+                'body': 'Body'
+            },
+            {
+                'subject': 'Subject 2',
+                'from': 'Sample name <sample@example.com>',
+                'body': 'Body2'
+            }
+        ]
+    }
+    return HttpResponse(template.render(context, request))
