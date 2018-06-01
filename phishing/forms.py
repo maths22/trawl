@@ -40,8 +40,8 @@ client = session.client(
 class CreateTemplate(forms.Form):
     message_template = forms.CharField()
     subject = forms.CharField()
-    worker_id = forms.IntegerField()
-    assignment_id = forms.IntegerField()
+    worker_id = forms.CharField()
+    assignment_id = forms.CharField()
 
     def execute(self):
         message_template = self.cleaned_data['message_template']
