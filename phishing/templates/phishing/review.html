@@ -34,12 +34,8 @@
           {% for message in messages %}
             <div class="hidden msg-body" id="msg-body-{{ forloop.counter0 }}">
               <h4>{{ message.subject }}</h4>
-              <p>
-                From: {{ message.from }}
-              </p>
-              <p>
-                {{ message.body }}
-              </p>
+              <p>From: {{ message.from }}</p>
+              <p>{{ message.body }}</p>
             </div>
           {% endfor %}
         </div>
