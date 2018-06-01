@@ -48,7 +48,9 @@
     <input type="hidden" name="worker_id" value="{{ worker_id }}"/>
     <input type="hidden" name="assignmentId" value="{{ assignment_id }}"/>
 
-    <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+    {% if assignment_id != 'ASSIGNMENT_ID_NOT_AVAILABLE' %}
+      <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+    {% endif %}
   </form>
 {% endblock %}
 

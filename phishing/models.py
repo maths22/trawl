@@ -10,11 +10,18 @@ class Constraint(models.Model):
     data = models.TextField()
 
 
+class EvaluationTask(models.Model):
+    id = models.AutoField(primary_key=True)
+    hit_id = models.CharField(max_length=100, null=True)
+
+
 class Submission(models.Model):
     creator = models.ForeignKey(MTurkUser, models.SET_NULL, null=True)
+    task = models.ForeignKey(EvaluationTask, models.SET_NULL, null=True)
     assignmentId = models.CharField(max_length=100, primary_key=True)
-    when_submitted = models.DateTimeField(auto_now_add=True) 
+    when_submitted = models.DateTimeField(auto_now_add=True)
     payout = models.BooleanField()
+    subject = models.TextField()
     text = models.TextField()
     constraints = models.ManyToManyField(Constraint)
 

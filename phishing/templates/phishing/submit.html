@@ -2,14 +2,36 @@
 
 {% block content %}
   <h3>Compose message</h3>
-  <b>Instructions:</b>
+  <h4>Instructions:</h4>
   <p>
-    {{ directions }}
+    This task requires you to write a spear-phishing email to an imaginary target.
+    If you are not familiar with spear-phishing, an explanation is included below.
+
+
+    {{ directions|safe }}
+
+	(Note that an effective spear-phishing message may include all, some, or possibly none of the above information.)
+
+	<h5>Requirements</h5>
+	<ol>
+		<li>The message must read as an English-language email.</li>
+		<li>The message must not read as spam.</li>
+		<li>The message must contain only the above information.</li>
+		<li>The message should include a subject line (if you believe that having no subject line would be more convincing, you can put `no subject` for the subject line).</li>
+		<li>The message can be as long or as short as necessary to be convincing.</li>
+    <li>The message should reference some feature of Roger's particular situation, either directly or indirectly.</li>
+	</ol>
+
+
   </p>
   <form action="{{ turk_submit_to }}/mturk/externalSubmit" method="post" id="submitForm">
     {% csrf_token %}
     <input type="hidden" name="worker_id" value="{{ worker_id }}"/>
     <input type="hidden" name="assignmentId" value="{{ assignment_id }}"/>
+    <div class="form-group">
+      <label for="messageTemplate">Subject</label>
+      <input class="form-control" name="message_subject" id="messageSubject">
+    </div>
     <div class="form-group">
       <label for="messageTemplate">Message Template</label>
       <textarea class="form-control" rows="10" name="message_template" id="messageTemplate"></textarea>
@@ -37,8 +59,34 @@
       </li>
     </ul>
 
-    <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+    {% if assignment_id != 'ASSIGNMENT_ID_NOT_AVAILABLE' %}
+      <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
+    {% endif %}
   </form>
+
+  <p>
+  <h5>FAQs</h5>
+  <b>What are spear-phishing messages?</b>
+  <p>
+	Spear-phishing messages are focused messages designed to obtain specific information from a target.  In particular, spear-phishing emails usually purport to be sent by someone the target trusts, and they ask the target to do something specific (usually to provide some form of information).  Generally, they take advantage of the trust in an established relationship to convince the target to do something that they would otherwise not do.  Often, they will use a combination of time pressure and/or situational pressure to make the target less likely to ask questions about the task.  For example, an email claiming to come from a CEO urgently asking for a list of clients before an important meeting is likely to receive an immediate response.  Spear-phishing messages also often include information that the target would expect only real acquaintances to know.  The most extreme spear-phishing attacks may include details of the target's personal life that were posted on Facebook.  More commonplace examples include displaying knowledge of the target's precise job function or family relationships.
+  </p>
+
+  <b>What makes spear-phishing different from regular phishing?</b>
+
+  <p>
+	An ordinary phishing message is usually a message that is sent to a large number of people, claiming to come from a popular website and designed to encourage the targets to click a link.  Attackers often use these messages to collect login information for email, social media, or financial service websites.  These messages rely on a relatively small fraction of the targets clicking a link and providing a username and password, and the information sought generally is not specific to an individual or company.  Also, the only personal information included in such emails are the targets' emails, and occasionally names.
+  </p>
+
+  <b>Can I see some example spear-phishing messages?</b>
+
+  <p>
+  Sent to a vice president claiming to be from his employer's CEO:<br/>
+  <img src="https://www.edts.com/hs-fs/hubfs/Phsihing%20Example%2018.jpg"><br/>
+  <br/>
+  Sent from the recipient's bank:<br/>
+  <img src="https://www.edts.com/hs-fs/hubfs/Phishing%20Example%2012.png">
+  </p>
+  </p>
 {% endblock %}
 
 {% block scripts %}
