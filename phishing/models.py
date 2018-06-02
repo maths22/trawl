@@ -27,8 +27,9 @@ class Submission(models.Model):
 
 
 class Rating(models.Model):
+    id = models.AutoField(primary_key=True)
     creator = models.ForeignKey(MTurkUser, models.SET_NULL, null=True)
-    assignmentId = models.CharField(max_length=100, primary_key=True)
+    assignmentId = models.CharField(max_length=100)
     when_submitted = models.DateTimeField(auto_now_add=True)
     submission = models.ForeignKey(Submission, models.CASCADE)
     is_spam = models.BooleanField()

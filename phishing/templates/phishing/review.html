@@ -47,6 +47,7 @@
     {% csrf_token %}
     <input type="hidden" name="worker_id" value="{{ worker_id }}"/>
     <input type="hidden" name="assignmentId" value="{{ assignment_id }}"/>
+    <input type="hidden" name="task" value="{{ task }}"/>
 
     {% if assignment_id != 'ASSIGNMENT_ID_NOT_AVAILABLE' %}
       <button type="submit" class="btn btn-primary" disabled id="submitButton">Submit</button>
@@ -80,27 +81,33 @@ $(".msg").on("click", function() {
     $(".msg-body").addClass("hidden");
     $("#msg-body-"+msgid).removeClass("hidden");
     $(".spamselector").prop("checked", false);
+    $("input[name=spam]").parent().removeClass("active");
+    if(results[selected]) {
+        $("input[name=spam][value=" + results[selected] + "]").parent().addClass("active");
+    }
 });
 
 $(".spamselector").on("change", function() {
-    results[selected] = this.value;
-  $("#msg-done-"+selected).removeClass("hidden");
-  console.log(allDone());
-  if(allDone()) {
-      $("#submitButton").prop('disabled', false);
-  }
+    if(this.checked) {
+        results[selected] = this.value;
+        $("#msg-done-" + selected).removeClass("hidden");
+        console.log(allDone());
+        if (allDone()) {
+            $("#submitButton").prop('disabled', false);
+        }
+    }
 });
 
 var submitForm = $('#submitForm');
 
 submitForm.submit(function(e){
     e.preventDefault();
-    var data = submitForm.serialize();
-    data.results = results;
+    var data = submitForm.serializeArray();
+    data.push({name: "results", value: results});
     $.ajax({
         url:'/submit_review',
         type:'post',
-        data:submitForm.serialize(),
+        data:$.param(data),
         success:function(d){
             if(d['result']) {
                 submitForm.unbind("submit");

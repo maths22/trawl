@@ -1,5 +1,6 @@
 import datetime
 
+import boto3
 from django.shortcuts import render
 
 from django.http import HttpResponse, JsonResponse
@@ -7,13 +8,38 @@ from django.template import loader
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from phishing.forms import CreateTemplate
-from phishing.models import Submission, MTurkUser
+from phishing.models import Submission, MTurkUser, Rating
 
 # import the logging library
 import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+create_hits_in_live = False
+
+environments = {
+        "live": {
+            "endpoint": "https://mturk-requester.us-east-1.amazonaws.com",
+            "preview": "https://www.mturk.com/mturk/preview",
+            "manage": "https://requester.mturk.com/mturk/manageHITs",
+            "reward": "0.00"
+        },
+        "sandbox": {
+            "endpoint": "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
+            "preview": "https://workersandbox.mturk.com/mturk/preview",
+            "manage": "https://requestersandbox.mturk.com/mturk/manageHITs",
+            "reward": "0.11"
+        },
+}
+mturk_environment = environments["live"] if create_hits_in_live else environments["sandbox"]
+
+session = boto3.Session()
+client = session.client(
+    service_name='mturk',
+    region_name='us-east-1',
+    endpoint_url=mturk_environment['endpoint'],
+)
 
 
 def index(request):
@@ -74,6 +100,7 @@ def review(request):
         'worker_id': request.GET.get('workerId', ''),
         'assignment_id': request.GET.get('assignmentId', ''),
         'turk_submit_to': request.GET.get('turkSubmitTo', ''),
+        'task': request.GET.get('task', ''),
         'messages': list(map(lambda x: {
                     'from': 'John Doe <john@example.com>',
                     'subject': x.subject,
@@ -81,3 +108,51 @@ def review(request):
                 }, objs))
     }
     return HttpResponse(template.render(context, request))
+
+
+def submit_review(request):
+    logger.warning(request.POST)
+    worker_id = request.POST.get('worker_id', '')
+    task_id = request.POST.get('task', '')
+    assignment_id = request.POST.get('assignmentId', '')
+    results = request.POST.get('results', '').split(",")
+
+    try:
+        mt_usr = MTurkUser.objects.get(pk=worker_id)
+    except MTurkUser.DoesNotExist:
+        mt_usr = MTurkUser(workerId=worker_id)
+        mt_usr.save()
+
+    submissions = Submission.objects.filter(task=task_id).all()
+    for (submission, result) in zip(submissions, results):
+        rating = Rating(
+            creator=mt_usr,
+            assignmentId=assignment_id,
+            when_submitted=datetime.datetime.now(),
+            submission=submission,
+            is_spam=result == 'spam',
+            is_email=True,
+            is_comprehensible=True,
+            is_correct_info=True,
+        )
+        rating.save()
+
+        if not submission.payout:
+            all_ratings = Rating.objects.filter(assignmentId=assignment_id).all()
+            if len(all_ratings) < 10:
+                continue
+            client.approve_assignment(
+                AssignmentId=submission.assignmentId
+            )
+            spam_count = map(lambda x: x.is_spam, all_ratings).count(True)
+            if spam_count <= 1:
+                client.send_bonus(
+                    WorkerId=submission.creator.workerId,
+                    AssignmentId=submission.assignmentId,
+                    BonusAmount=0.5, #TODO set the bonus amount
+                    Reason="Your submission was almost universally seen as not spam"
+                )
+            submission.payout = True
+            submission.save()
+
+    return JsonResponse({'result': True})

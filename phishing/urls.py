@@ -7,4 +7,5 @@ urlpatterns = [
     path('submit', views.submit, name='submit'),
     path('review', views.review, name='review'),
     path('submit_template', views.submit_template, name='submit_template'),
+    path('submit_review', views.submit_review, name='submit_review'),
 ]
